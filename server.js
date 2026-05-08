@@ -32,7 +32,7 @@ wss.on('connection', (ws) => {
           // Рассылаем всем, кроме отправителя, обновлённый ник
           broadcast({ type: 'nickname-changed', id: sender.id, nick: newNick }, ws);
         }
-        return; // не ретранслируем дальше
+        return;
       }
 
       // Для всех остальных сообщений (pos, chat) прикрепляем id отправителя
