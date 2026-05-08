@@ -21,7 +21,22 @@ wss.on('connection', (ws) => {
   ws.on('message', (data) => {
     try {
       const msg = JSON.parse(data);
-      msg.from = clients.get(ws)?.id;
+      const sender = clients.get(ws);
+      if (!sender) return;
+
+      // Обработка смены ника
+      if (msg.type === 'nickname-change') {
+        const newNick = msg.nick.trim();
+        if (newNick && newNick !== sender.nick) {
+          sender.nick = newNick;
+          // Рассылаем всем, кроме отправителя, обновлённый ник
+          broadcast({ type: 'nickname-changed', id: sender.id, nick: newNick }, ws);
+        }
+        return; // не ретранслируем дальше
+      }
+
+      // Для всех остальных сообщений (pos, chat) прикрепляем id отправителя
+      msg.from = sender.id;
       broadcast(msg, ws);
     } catch (e) {}
   });
